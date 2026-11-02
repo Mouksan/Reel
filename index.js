@@ -120,6 +120,67 @@ COLLAGE RULES:
 
 ${COLLAGE_RULES}`;
 
+// «Скрытая камера (CineStill)»: документальная плёнка, 5 панелей, три русских
+// текста. Твои правила почти дословно; модель копирует их в промпт и заполняет
+// только панели и тексты. Холст всегда 3:4 (замок у шаблона).
+const CINESTILL_RULES = `CANDID PHOTOGRAPHIC COLLAGE in an asymmetric comic-style panel layout, vertical 3:4 canvas, solid matte black (#050505) background with thick black gutters. Panels tile the canvas edge to edge in a tight grid: no empty black areas, no gaps larger than the gutter width. Visualize the ENTIRE latest roleplay message from start to finish, as stills from a documentary shot by a hidden observer. All characters are real adults, completely unaware of the camera, caught mid-action in a real moment. Nobody poses. Nobody looks into the lens: eyes closed, looking down, looking at each other, or looking away. Shot on 35mm film, CineStill 800T, handheld, slightly underexposed, heavy grain, motion blur, imperfect focus, accidental framing, objects partly blocking the view. Skin: uneven tone, visible pores, small blemishes, no retouching. Hair: messy, flyaway strands. Fabric: real wrinkles and creases. Tattoos: slightly faded, soft edges.
+
+=== PANEL LAYOUT ===
+5 panels of different sizes, some with diagonal edges, one small panel in a corner. One beat per panel, in story order:
+Wide panel: the whole place, people small in the frame, shot from a distance or through an obstacle.
+From-behind or over-the-shoulder panel: a character doing something.
+Two characters interacting, from the side or from below, mid-gesture, not looking at the camera.
+Detail panel: hands, objects, props from the scene.
+Small accent panel: an unexpected detail (a reflection, a shadow, an object on the floor).
+STRICTLY NO close-ups of faces: every face is shown only in profile, turned away, in shadow, cropped by the frame edge, or small in the frame. Show bodies, hands, backs and surroundings instead.
+
+=== LIGHT ===
+Only practical light from the scene itself. Harsh uneven light, deep shadows, mixed color temperatures, no beauty lighting, no rim light, no glow.
+
+=== SCENE FIDELITY ===
+Every specific detail from the text: clothing, jewelry, tattoos, props, setting. Natural body weight, relaxed or tense posture, not model poses.
+
+=== FILM DETAILS ===
+A narrow film-strip edge along the left side of the canvas with only small orange triangle arrows and sprocket holes, no letters, no words. One small orange digital date stamp in the corner of one panel, numbers only. Light dust and fine scratches on one or two panels, one panel slightly overexposed. No drawn marks, no circles, no arrows, no red lines, no annotations on the photos.
+
+=== TYPOGRAPHY (exactly 3 DIFFERENT pieces of text, each used ONCE, each in a different panel, flawless Russian) ===
+Text is placed directly on the photo with no background box, no highlight, no colored strip, only a very soft shadow for readability.
+DIALOGUE QUOTE, in a corner of a panel, in guillemets «like this», thin serif, warm cream (#FFF8E7). The guillemets are the same font, color and weight as the letters.
+HANDWRITTEN NOTE, on a different panel, white marker script, 2-4 words, no quotes. The note stands alone: no arrow, line, circle or pointer next to it.
+SUBTITLE, on a third panel, centered at the bottom, small clean sans-serif, white, no quotes.
+Each piece is under 8 words, placed in negative space, never covering faces. No other text anywhere, no repeated phrases: each of the three pieces appears exactly once on the whole canvas.`;
+
+const CINESTILL_INSTRUCTION = `You write ONE image prompt for nano banana (an image model) that turns the POST below into a candid documentary photo collage.
+
+OUTPUT FORMAT (strict): only the prompt itself, in English, except the three Russian text pieces. No preamble, no roleplay text, no HTML, no markdown, no explanation.
+
+SOURCES:
+- The POST is the scene to draw. The USER LAST MESSAGE is context only.
+- Character appearance comes from the CHARACTER CARD, the USER PERSONA and the FIXED APPEARANCE notes. FIXED APPEARANCE wins over the card when they conflict.
+- PREVIOUS PROMPT, if given, is a continuity reference only: follow the note attached to it.
+- USER WISH, if given, has the highest priority for framing, poses and panel choice.
+
+HOW TO WRITE THE PROMPT:
+- Follow the COLLAGE RULES below. Copy these parts into the prompt word for word: the opening CANDID PHOTOGRAPHIC COLLAGE paragraph, the first line of PANEL LAYOUT and its STRICTLY NO close-ups line, the LIGHT section, the SCENE FIDELITY section, the FILM DETAILS section and the TYPOGRAPHY section with all its formatting rules.
+- Name every character by their exact name. Describe each one's appearance once, before the panels: sex, adult age, species, build, skin tone, hair color and style, distinctive features, tattoos, jewelry, current clothing. Describe non-human anatomy exactly (animal ears, tails, horns).
+- Then write Panel 1 to Panel 5, each on its own line, following the five beat types of PANEL LAYOUT in story order across the WHOLE post, from its first paragraph to its last. For each panel state its position and size on the canvas, the camera angle, who is in it, where, the action and physical contact (who touches whom, with what), body posture, and what hides or turns away each face. Use names, not pronouns.
+- Use only what the post and the cards support. Never invent events, characters or important objects.
+- Romantic and intimate scenes are allowed but stay non-explicit: if the post becomes sexually explicit, show the last clearly non-explicit moment, described in neutral physical terms.
+- Keep the whole prompt under 550 words.
+
+THE THREE TEXTS (CRITICAL): all in Russian, all different from each other, each under 8 words, each assigned to a different panel.
+- DIALOGUE QUOTE: one short line a character actually says aloud in the POST, copied verbatim in its original Russian, a complete sentence or a self-contained excerpt. Preserve profanity. If nobody speaks, the most striking short thought.
+- HANDWRITTEN NOTE: 2–4 Russian words naming a key detail or action of the scene (for example: золотой браслет). Not a quote, not a repeat of the other two texts.
+- SUBTITLE: a short Russian caption of the moment, like a documentary subtitle (for example: семейный обед в оранжерее). Not a quote, no quotation marks.
+Put them at the end of the prompt, each on its own line, exactly in this form:
+Dialogue quote (Panel N, corner): «реплика»
+Handwritten note (Panel M): заметка
+Subtitle (Panel K, bottom center): субтитр
+
+COLLAGE RULES:
+
+${CINESTILL_RULES}`;
+
 // Раскладки панелей: «Название | текст», по одной на строку.
 // Подставляются в шаблон вместо {{layout}}. Две одинаковые подряд не выпадают.
 const DEFAULT_LAYOUTS = [
@@ -154,7 +215,7 @@ All characters are fictional adults.`;
 
 // Версия встроенных шаблонов. Растёт, когда меняется текст встроенных:
 // у тебя настройки уже сохранены, и без этого остался бы старый текст.
-const SEED_VERSION = 2;
+const SEED_VERSION = 3;
 
 // Встроенные, чей текст переписывается при обновлении. Остальные только
 // добавляются, если их нет: твои правки в них не трогаются.
@@ -169,8 +230,14 @@ const DEFAULT_LOCAL_ENDPOINT = 'http://127.0.0.1:8001';
 const defaultSettings = Object.freeze({
     seedVersion: SEED_VERSION,
     enabled: true,
+    // Откуда модель для промпта: 'profile' — профиль/текущее подключение
+    // таверны, 'custom' — свой OpenAI-совместимый адрес (порт из Комы).
+    promptSource: 'profile',
     // '' = текущее подключение таверны. Иначе id профиля из Connection Manager.
     profileId: '',
+    customEndpoint: '',
+    customKey: '',
+    customModel: '',
     activePresetId: 'cinema-collage',
     // Размышления модели тратятся из того же бюджета, что и видимый ответ,
     // поэтому лимит щедрый.
@@ -214,10 +281,15 @@ const defaultSettings = Object.freeze({
 
     // Картинки, дорисованные после ухода из чата: ждут возвращения в него.
     // { chatId, key, messageId, image }
+    // Стили: { id, name, tags }. Текст уходит в начало промпта для бананы. '' = без стиля.
+    styles: [],
+    activeStyleId: '',
     mailbox: [],
     debug: false,
     presets: [
         { id: 'cinema-collage', name: 'Кино-коллаж (Ektachrome)', builtIn: true, instruction: CINEMA_COLLAGE_INSTRUCTION },
+        // aspectLock: соотношение шаблона, сильнее общей настройки «Соотношение сторон».
+        { id: 'cinestill-candid', name: 'Скрытая камера (CineStill)', builtIn: true, aspectLock: '3:4', instruction: CINESTILL_INSTRUCTION },
     ],
 });
 
@@ -289,9 +361,9 @@ function getSettings() {
     if (!ASPECT_RATIOS.includes(settings.aspectRatio)) settings.aspectRatio = defaultSettings.aspectRatio;
     if (!IMAGE_SIZES.includes(settings.imageSize)) settings.imageSize = defaultSettings.imageSize;
     if (typeof settings.layouts !== 'string') settings.layouts = DEFAULT_LAYOUTS;
-    // Стили были в 0.1 — убраны.
-    delete settings.styles;
-    delete settings.activeStyleId;
+    // Стили вернулись в 0.3 (в 0.1 были, в 0.2 убраны).
+    if (!Array.isArray(settings.styles)) settings.styles = [];
+    if (typeof settings.activeStyleId !== 'string') settings.activeStyleId = '';
     if (!Array.isArray(settings.mailbox)) settings.mailbox = [];
     if (!Array.isArray(settings.presets) || settings.presets.length === 0) {
         settings.presets = structuredClone(defaultSettings.presets);
@@ -710,6 +782,10 @@ async function requestModel(instruction, contextText, signal) {
         else instruction = `${instruction}\n\n${jailbreak}`;
     }
 
+    if (settings.promptSource === 'custom') {
+        return requestCustomEndpoint({ instruction, contextText, prefill, maxTokens }, signal);
+    }
+
     if (settings.profileId) {
         const messages = [
             { role: 'system', content: instruction },
@@ -741,6 +817,93 @@ async function requestModel(instruction, contextText, signal) {
         prefill,
     });
     return typeof raw === 'string' ? raw : String(raw?.content || raw?.text || raw || '');
+}
+
+// ─── Напрямую: свой OpenAI-совместимый адрес (порт из DS Comments) ─────────
+
+// Запрос не потоковый, так что это потолок на весь ответ целиком.
+const CUSTOM_TIMEOUT_MS = 300_000;
+// Что уходит в reasoning_effort при «Размышления: минимум». 'low' понимают
+// почти все OpenAI-совместимые прокси; 'minimal' — только часть моделей.
+const CUSTOM_REASONING_MIN = 'low';
+
+/** Адрес как в комментах: можно с /v1 или полным до /chat/completions. */
+function normalizeCustomEndpoint(raw) {
+    let url;
+    try {
+        url = new URL(String(raw || '').trim());
+    } catch {
+        return null;
+    }
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    const path = url.pathname.replace(/\/+$/, '');
+    if (/\/chat\/completions$/i.test(path)) return url.origin + path;
+    if (/\/v1$/i.test(path)) return `${url.origin}${path}/chat/completions`;
+    return `${url.origin}/v1/chat/completions`;
+}
+
+/** Достаёт текст из ответа (OpenAI, Claude-подобный, Gemini) — как в комментах. */
+function extractCustomText(data) {
+    if (!data) return '';
+    if (typeof data === 'string') return data;
+    const fromBlocks = (blocks) => blocks.filter(b => b?.type === 'text' && typeof b.text === 'string').map(b => b.text).join('\n');
+    const choice = data.choices?.[0]?.message?.content;
+    if (typeof choice === 'string') return choice;
+    if (Array.isArray(choice)) return fromBlocks(choice);
+    if (typeof data.content === 'string') return data.content;
+    if (Array.isArray(data.content)) return fromBlocks(data.content);
+    const parts = data.candidates?.[0]?.content?.parts;
+    if (Array.isArray(parts)) return parts.filter(p => typeof p?.text === 'string' && !p.thought).map(p => p.text).join('');
+    if (typeof data.text === 'string') return data.text;
+    return '';
+}
+
+/**
+ * Прямой запрос из браузера. Шлём то же, что уходит через профиль: лимит
+ * токенов и размышления. Адрес должен отдавать CORS-заголовки.
+ */
+async function requestCustomEndpoint({ instruction, contextText, prefill, maxTokens }, signal) {
+    const settings = getSettings();
+    const url = normalizeCustomEndpoint(settings.customEndpoint);
+    if (!url) throw new Error('Не указан адрес модели для промпта — загляни в «Модель для промпта».');
+
+    const messages = [
+        { role: 'system', content: instruction },
+        { role: 'user', content: contextText },
+    ];
+    if (prefill) messages.push({ role: 'assistant', content: prefill });
+    const body = { messages, stream: false, max_tokens: maxTokens };
+    const model = String(settings.customModel || '').trim();
+    if (model) body.model = model;
+    if (settings.reasoningEffort === 'min') body.reasoning_effort = CUSTOM_REASONING_MIN;
+
+    const headers = { 'Content-Type': 'application/json' };
+    const key = String(settings.customKey || '').trim();
+    if (key) headers.Authorization = `Bearer ${key}`;
+
+    const timeout = new AbortController();
+    let timedOut = false;
+    const onAbort = () => timeout.abort();
+    signal?.addEventListener('abort', onAbort, { once: true });
+    const timer = setTimeout(() => { timedOut = true; timeout.abort(); }, CUSTOM_TIMEOUT_MS);
+    reelLog('INFO', `Напрямую: ${url}, модель ${model || '(по умолчанию)'}`);
+
+    let response;
+    try {
+        response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal: timeout.signal });
+    } catch (error) {
+        if (timedOut) throw new Error(`Endpoint did not respond within ${CUSTOM_TIMEOUT_MS / 1000} s`);
+        if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+        throw error;
+    } finally {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', onAbort);
+    }
+    if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`Endpoint HTTP ${response.status}${text ? `: ${text.slice(0, 300)}` : ''}`);
+    }
+    return extractCustomText(await response.json());
 }
 
 /** Срезает рассуждения, обёртку ``` и вступление модели («Okay, here is…»). */
@@ -799,6 +962,21 @@ function parsePromptOutput(raw) {
 }
 
 /** Строка субтитра из промпта или пусто. */
+// ─── Стили (порт из Глинта) ──────────────────────────────────────────────
+
+function getActiveStyle() {
+    const settings = getSettings();
+    if (!settings.activeStyleId) return null;
+    return settings.styles.find(s => s.id === settings.activeStyleId) || null;
+}
+
+/** Стиль — отдельным абзацем в начало промпта. */
+function composeFinalPrompt(prompt, style) {
+    const styleText = String(style?.tags || '').trim();
+    const body = String(prompt || '').trim();
+    return styleText ? `${styleText}\n\n${body}` : body;
+}
+
 function getSubtitle(prompt) {
     return String(prompt || '').match(SUBTITLE_RE)?.[1]?.trim() || '';
 }
@@ -871,13 +1049,14 @@ async function runPrompt(messageId, { wish = '' } = {}) {
         toastr.error('Модель не вернула промпт. Попробуй ✏️ ещё раз', TOAST_TITLE, { timeOut: 5000 });
         return;
     }
-    if (!getSubtitle(prompt)) reelLog('WARN', `#${messageId}: в промпте нет строки «Subtitle text: "…"»`);
+    if (/Subtitle text/i.test(template) && !getSubtitle(prompt)) reelLog('WARN', `#${messageId}: в промпте нет строки «Subtitle text: "…"»`);
 
     const result = await writeSwipeData(target, {
         status: 'prompt',
         prompt,
         presetName: preset?.name || '',
         layoutName: layout?.name || '',
+        aspectLock: ASPECT_RATIOS.includes(preset?.aspectLock) ? preset.aspectLock : '',
         promptAt: Date.now(),
         wish,
         edited: false,
@@ -1114,13 +1293,13 @@ async function resolveNaisteraModel() {
 // ─── Наистера ────────────────────────────────────────────────────────────
 
 /** refs: [{ name, dataUrl }]. Возвращает data URL картинки. */
-async function requestNaistera(prompt, refs, signal) {
+async function requestNaistera(prompt, refs, signal, aspect = getSettings().aspectRatio) {
     const settings = getSettings();
     const url = `${getNaisteraBase()}/api/generate`;
     const model = await resolveNaisteraModel();
     const body = {
         prompt: withRefInstruction(prompt, refs.length),
-        aspect_ratio: settings.aspectRatio,
+        aspect_ratio: aspect,
         model,
     };
     const setRefs = () => {
@@ -1167,7 +1346,7 @@ function splitDataUrl(src) {
     return { mime: 'image/png', b64: String(src || '') };
 }
 
-function buildGeminiBody(prompt, refs, omitImageConfig) {
+function buildGeminiBody(prompt, refs, omitImageConfig, aspect = getSettings().aspectRatio) {
     const settings = getSettings();
     const parts = [];
     for (const ref of refs) {
@@ -1176,7 +1355,7 @@ function buildGeminiBody(prompt, refs, omitImageConfig) {
     }
     parts.push({ text: withRefInstruction(prompt, refs.length) });
     const generationConfig = { responseModalities: ['TEXT', 'IMAGE'] };
-    if (!omitImageConfig) generationConfig.imageConfig = { aspectRatio: settings.aspectRatio, imageSize: settings.imageSize };
+    if (!omitImageConfig) generationConfig.imageConfig = { aspectRatio: aspect, imageSize: settings.imageSize };
     return { contents: [{ role: 'user', parts }], generationConfig };
 }
 
@@ -1223,7 +1402,7 @@ function parseGeminiImage(result) {
     throw new Error('No image in provider response');
 }
 
-async function requestLocal(prompt, refs, signal) {
+async function requestLocal(prompt, refs, signal, aspect = getSettings().aspectRatio) {
     const settings = getSettings();
     const base = getLocalBase();
     const model = String(settings.localModel || '').trim();
@@ -1236,10 +1415,10 @@ async function requestLocal(prompt, refs, signal) {
     const post = () => timedFetch(url, {
         method: 'POST',
         headers: getLocalHeaders(),
-        body: JSON.stringify(buildGeminiBody(prompt, currentRefs, omitImageConfig)),
+        body: JSON.stringify(buildGeminiBody(prompt, currentRefs, omitImageConfig, aspect)),
     }, signal);
 
-    reelLog('INFO', `Локалка: ${model}, ${settings.aspectRatio}, ${settings.imageSize}, рефов ${refs.length}, ${url}`);
+    reelLog('INFO', `Локалка: ${model}, ${aspect}, ${settings.imageSize}, рефов ${refs.length}, ${url}`);
     let response = await post();
 
     // Некоторые прокси отвечают только под /compatible: пробуем один раз и запоминаем.
@@ -1440,8 +1619,12 @@ async function runDraw(target) {
 
     const provider = settings.provider;
     const folder = getUploadFolderName();
-    const finalPrompt = String(data.prompt || '').trim();
-    const aspect = settings.aspectRatio;
+    // Стиль — необязательная добавка поверх плёнки шаблона.
+    const style = getActiveStyle();
+    const finalPrompt = composeFinalPrompt(String(data.prompt || '').trim(), style);
+    // Замок соотношения у шаблона (CineStill — 3:4) сильнее общей настройки.
+    const aspect = ASPECT_RATIOS.includes(data.aspectLock) ? data.aspectLock : settings.aspectRatio;
+    if (style) reelLog('INFO', `Стиль «${style.name}» в начале промпта`);
 
     await writeSwipeData(target, { drawStatus: 'drawing', drawError: null, drawStartedAt: Date.now() });
     toastr.info('Рисую в банане…', TOAST_TITLE, { timeOut: 2000 });
@@ -1471,10 +1654,10 @@ async function runDraw(target) {
             try {
                 if (provider === 'local') {
                     model = String(settings.localModel || '').trim();
-                    imageUrl = await requestLocal(finalPrompt, refs, job.controller.signal);
+                    imageUrl = await requestLocal(finalPrompt, refs, job.controller.signal, aspect);
                 } else {
                     model = await resolveNaisteraModel();
-                    imageUrl = await requestNaistera(finalPrompt, refs, job.controller.signal);
+                    imageUrl = await requestNaistera(finalPrompt, refs, job.controller.signal, aspect);
                 }
                 break;
             } catch (error) {
@@ -1615,6 +1798,10 @@ function buildWindow() {
                         <label for="reel_win_preset" class="reel-style-label">Шаблон</label>
                         <select id="reel_win_preset" class="text_pole reel-style-select"></select>
                     </div>
+                    <div class="reel-style-row reel-style-row-tight" id="reel_style_row">
+                        <label for="reel_style" class="reel-style-label">Стиль</label>
+                        <select id="reel_style" class="text_pole reel-style-select"></select>
+                    </div>
                     <input type="text" id="reel_wish" class="text_pole reel-wish" placeholder="💬 Пожелание: например, первая панель — общий план зала, он без очков" autocomplete="off">
                     <div class="reel-actions" id="reel_actions_main">
                         <button type="button" class="reel-btn" id="reel_btn_reprompt">✏️ Новый промпт</button>
@@ -1679,6 +1866,11 @@ function buildWindow() {
         getSettings().activePresetId = e.target.value;
         saveSettings();
         refreshPresetSelect();
+    });
+
+    document.getElementById('reel_style').addEventListener('change', (e) => {
+        getSettings().activeStyleId = e.target.value;
+        saveSettings();
     });
 
     document.getElementById('reel_btn_edit').addEventListener('click', startEditing);
@@ -1839,7 +2031,7 @@ function openPromptExpanded() {
     overlay.innerHTML = `
         <div class="reel-popup reel-expand-popup" role="dialog" aria-label="Промпт">
             <div class="reel-popup-head">
-                <div class="reel-popup-title">⊹ Промпт #${escapeHtml(String(messageId))} ⊹</div>
+                <div class="reel-popup-title">「 Промпт #${escapeHtml(String(messageId))} 」</div>
                 <button class="reel-popup-x" type="button" aria-label="Закрыть"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="reel-expand-body">
@@ -2015,6 +2207,7 @@ function renderMainView() {
     const editBtn = $('reel_btn_edit');
 
     refreshPresetSelect();
+    refreshStyleSelect();
 
     const message = getContext().chat?.[state.viewMessageId];
     if (!message) {
@@ -2026,11 +2219,13 @@ function renderMainView() {
         promptBlock.hidden = true;
         $('reel_actions_main').hidden = true;
         $('reel_preset_row').hidden = true;
+        $('reel_style_row').hidden = true;
         $('reel_wish').hidden = true;
         return;
     }
     $('reel_actions_main').hidden = false;
     $('reel_preset_row').hidden = false;
+    $('reel_style_row').hidden = false;
     $('reel_wish').hidden = false;
 
     const data = readSwipeData(message);
@@ -2639,6 +2834,22 @@ function newPresetId(base = 'preset') {
 }
 
 /** Выпадашки шаблона в настройках и в окне — один и тот же выбор. */
+function refreshStyleSelect() {
+    const select = document.getElementById('reel_style');
+    if (!select) return;
+    const settings = getSettings();
+    const options = [{ id: '', name: 'Без стиля' }, ...settings.styles];
+    const html = options
+        .map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || 'Без названия')}</option>`)
+        .join('');
+    if (select.dataset.html !== html) {
+        select.innerHTML = html;
+        select.dataset.html = html;
+    }
+    const exists = options.some(s => s.id === settings.activeStyleId);
+    select.value = exists ? settings.activeStyleId : '';
+}
+
 function refreshPresetSelect() {
     const settings = getSettings();
     const html = settings.presets
@@ -2664,7 +2875,7 @@ function openPresetManager() {
     overlay.innerHTML = `
         <div class="reel-popup reel-presets" role="dialog" aria-label="Шаблоны">
             <div class="reel-popup-head">
-                <div class="reel-popup-title">⊹ Шаблоны ⊹</div>
+                <div class="reel-popup-title">「 Шаблоны 」</div>
                 <button class="reel-popup-x" type="button" aria-label="Закрыть"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="reel-presets-cols">
@@ -2939,7 +3150,7 @@ function buildSettingsPanel() {
     const html = `
         <div id="reel_settings_root" class="inline-drawer">
             <div class="inline-drawer-toggle inline-drawer-header">
-                <b><i class="fa-solid fa-film" style="margin-right: 6px;"></i>⊹ REEL ⊹</b>
+                <b><i class="fa-solid fa-film" style="margin-right: 6px;"></i>「 REEL 」</b>
                 <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
             </div>
             <div class="inline-drawer-content">
@@ -2949,6 +3160,12 @@ function buildSettingsPanel() {
                         <span>Включено</span>
                     </label>
 
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-window-maximize fa-fw"></i> Окно и кнопка</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
                     <label for="reel_launcher_mode" class="reel-label">Кнопка вызова</label>
                     <select id="reel_launcher_mode" class="text_pole">
                         <option value="bar" ${settings.launcherMode === 'bar' ? 'selected' : ''}>В быстрых ответах</option>
@@ -2960,16 +3177,35 @@ function buildSettingsPanel() {
                         <input type="checkbox" id="reel_auto_chat">
                         <span>Авто в этом чате</span>
                     </label>
+                        </div>
+                    </div>
 
-                    <label for="reel_profile" class="reel-label">Профиль подключения</label>
-                    <select id="reel_profile" class="text_pole"></select>
-                    <div class="reel-hint" id="reel_profile_hint" hidden></div>
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-plug fa-fw"></i> Модель для промпта</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
+                    <div class="reel-label">Источник</div>
+                    <div class="reel-seg" id="reel_source">
+                        <button type="button" class="reel-seg-btn ${settings.promptSource !== 'custom' ? 'active' : ''}" data-src="profile">Профиль</button>
+                        <button type="button" class="reel-seg-btn ${settings.promptSource === 'custom' ? 'active' : ''}" data-src="custom">Напрямую</button>
+                    </div>
 
-                    <label for="reel_preset" class="reel-label">Шаблон</label>
-                    <select id="reel_preset" class="text_pole"></select>
-                    <div class="menu_button menu_button_icon" id="reel_manage_presets" style="margin-top: 6px;">
-                        <i class="fa-solid fa-sliders"></i>
-                        <span>Управление шаблонами</span>
+                    <div id="reel_src_profile" ${settings.promptSource === 'custom' ? 'hidden' : ''}>
+                        <label for="reel_profile" class="reel-label">Профиль подключения</label>
+                        <select id="reel_profile" class="text_pole"></select>
+                        <div class="reel-hint" id="reel_profile_hint" hidden></div>
+                    </div>
+
+                    <div id="reel_src_custom" ${settings.promptSource === 'custom' ? '' : 'hidden'}>
+                        <label for="reel_custom_endpoint" class="reel-label">Endpoint URL</label>
+                        <input type="url" id="reel_custom_endpoint" class="text_pole" placeholder="https://api.example.com/v1" value="${escapeHtml(settings.customEndpoint)}">
+                        <label for="reel_custom_key" class="reel-label">API-ключ</label>
+                        <input type="password" id="reel_custom_key" class="text_pole" autocomplete="off" placeholder="sk-..." value="${escapeHtml(settings.customKey)}">
+                        <label for="reel_custom_model" class="reel-label">ID модели (необязательно)</label>
+                        <input type="text" id="reel_custom_model" class="text_pole" placeholder="по умолчанию у API" value="${escapeHtml(settings.customModel)}">
+                        <div class="reel-hint">Любой OpenAI-совместимый адрес, можно с /v1 или полным до /chat/completions. Профиль таверны не трогается.</div>
                     </div>
 
                     <label for="reel_max_tokens" class="reel-label">Лимит токенов ответа</label>
@@ -2980,6 +3216,22 @@ function buildSettingsPanel() {
                         <option value="min" ${settings.reasoningEffort === 'min' ? 'selected' : ''}>Минимум</option>
                         <option value="auto" ${settings.reasoningEffort === 'auto' ? 'selected' : ''}>На усмотрение модели</option>
                     </select>
+                    <div class="reel-hint">Работает и с профилем, и напрямую.</div>
+                        </div>
+                    </div>
+
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-wrench fa-fw"></i> Шаблон</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
+                    <label for="reel_preset" class="reel-label">Шаблон</label>
+                    <select id="reel_preset" class="text_pole"></select>
+                    <div class="menu_button menu_button_icon" id="reel_manage_presets" style="margin-top: 6px;">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Управление шаблонами</span>
+                    </div>
 
                     <label class="checkbox_label reel-section">
                         <input type="checkbox" id="reel_jb_enabled" ${settings.jailbreakEnabled ? 'checked' : ''}>
@@ -2995,9 +3247,15 @@ function buildSettingsPanel() {
                         <label for="reel_jb_text" class="reel-label">Текст</label>
                         <textarea id="reel_jb_text" class="text_pole reel-jb-text" rows="8" spellcheck="false">${escapeHtml(settings.jailbreakText)}</textarea>
                     </div>
+                        </div>
+                    </div>
 
-                    <div class="reel-group-title">Банана</div>
-
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-paintbrush fa-fw"></i> Рисование</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
                     <label for="reel_provider" class="reel-label">Кто рисует</label>
                     <select id="reel_provider" class="text_pole">
                         <option value="naistera" ${settings.provider === 'naistera' ? 'selected' : ''}>Naistera</option>
@@ -3046,9 +3304,15 @@ function buildSettingsPanel() {
                         <input type="checkbox" id="reel_send_refs" ${settings.sendRefs ? 'checked' : ''}>
                         <span>Отправлять рефы</span>
                     </label>
+                        </div>
+                    </div>
 
-                    <div class="reel-group-title">Раскладки панелей</div>
-
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-table-cells-large fa-fw"></i> Раскладки панелей</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
                     <label class="checkbox_label">
                         <input type="checkbox" id="reel_random_layout" ${settings.randomLayout ? 'checked' : ''}>
                         <span>🎲 Рандомная раскладка</span>
@@ -3058,17 +3322,57 @@ function buildSettingsPanel() {
                     <div class="menu_button menu_button_icon" id="reel_layouts_reset" style="margin-top: 6px;">
                         <i class="fa-solid fa-rotate-left"></i><span>Вернуть встроенные раскладки</span>
                     </div>
+                        </div>
+                    </div>
 
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-palette fa-fw"></i> Стили</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
+                    <div id="reel_styles_list" class="reel-styles-list"></div>
+                    <div class="reel-style-btns">
+                        <div class="menu_button menu_button_icon" id="reel_style_add">
+                            <i class="fa-solid fa-plus"></i><span>Новый стиль</span>
+                        </div>
+                        <div class="menu_button menu_button_icon" id="reel_style_import">
+                            <i class="fa-solid fa-file-import"></i><span>Импорт из Frameweaver</span>
+                        </div>
+                    </div>
+                    <input type="file" id="reel_style_import_file" accept="application/json,.json" hidden>
+                    <div class="reel-hint">Текст стиля уходит в начало промпта для бананы. Плёнка шаблона остаётся — стиль ложится поверх.</div>
+                        </div>
+                    </div>
+
+                    <div class="reel-cat">
+                        <button type="button" class="reel-cat-head" aria-expanded="false">
+                            <span><i class="fa-solid fa-bug fa-fw"></i> Отладка</span>
+                            <i class="fa-solid fa-chevron-down reel-cat-chevron"></i>
+                        </button>
+                        <div class="reel-cat-body" hidden>
                     <label class="checkbox_label reel-section">
                         <input type="checkbox" id="reel_debug" ${settings.debug ? 'checked' : ''}>
                         <span>Подробные логи в консоль</span>
                     </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>`;
 
     container.insertAdjacentHTML('beforeend', html);
     refreshPresetSelect();
+
+    // Категории сворачиваются, как в DS Comments. При открытии все свёрнуты.
+    document.getElementById('reel_settings_root').addEventListener('click', (e) => {
+        const head = e.target.closest('.reel-cat-head');
+        if (!head) return;
+        const expanded = head.getAttribute('aria-expanded') === 'true';
+        head.setAttribute('aria-expanded', String(!expanded));
+        const body = head.nextElementSibling;
+        if (body) body.hidden = expanded;
+    });
     refreshModelDatalists();
 
     document.getElementById('reel_enabled').addEventListener('change', (e) => {
@@ -3098,6 +3402,24 @@ function buildSettingsPanel() {
     });
 
     document.getElementById('reel_manage_presets').addEventListener('click', openPresetManager);
+
+    document.getElementById('reel_source').addEventListener('click', (e) => {
+        const button = e.target.closest('[data-src]');
+        if (!button) return;
+        const source = button.dataset.src === 'custom' ? 'custom' : 'profile';
+        getSettings().promptSource = source;
+        for (const b of e.currentTarget.querySelectorAll('[data-src]')) b.classList.toggle('active', b === button);
+        document.getElementById('reel_src_profile').hidden = source === 'custom';
+        document.getElementById('reel_src_custom').hidden = source !== 'custom';
+        saveSettings();
+    });
+
+    for (const [id, key] of [['reel_custom_endpoint', 'customEndpoint'], ['reel_custom_key', 'customKey'], ['reel_custom_model', 'customModel']]) {
+        document.getElementById(id).addEventListener('change', (e) => {
+            getSettings()[key] = String(e.target.value || '').trim();
+            saveSettings();
+        });
+    }
 
     document.getElementById('reel_max_tokens').addEventListener('change', (e) => {
         const value = parseInt(e.target.value, 10);
@@ -3207,6 +3529,24 @@ function buildSettingsPanel() {
         saveSettings();
     });
 
+    document.getElementById('reel_style_add').addEventListener('click', () => {
+        const style = { id: newStyleId(), name: 'Новый стиль', tags: '' };
+        getSettings().styles.push(style);
+        saveSettings();
+        renderStylesList(style.id);
+        renderWindow();
+    });
+
+    const importFile = document.getElementById('reel_style_import_file');
+    document.getElementById('reel_style_import').addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        importFile.value = '';
+        if (file) await importStylesFromFile(file);
+    });
+
+    renderStylesList();
+
     document.getElementById('reel_debug').addEventListener('change', (e) => {
         getSettings().debug = !!e.target.checked;
         saveSettings();
@@ -3253,6 +3593,122 @@ async function refreshCatalog(provider, button = null, { silent = false } = {}) 
     } finally {
         if (button) button.disabled = false;
     }
+}
+
+// ─── Стили: список и импорт (порт из Глинта) ────────────────────────────
+
+function newStyleId() {
+    return `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/** Список стилей в настройках: каждый сворачивается, раскрыт только нужный. */
+function renderStylesList(openId = null) {
+    const list = document.getElementById('reel_styles_list');
+    if (!list) return;
+    const styles = getSettings().styles;
+    if (!styles.length) {
+        list.innerHTML = '<div class="reel-hint">Стилей пока нет.</div>';
+        return;
+    }
+    list.innerHTML = styles.map(style => `
+        <details class="reel-style-item" data-id="${escapeHtml(style.id)}" ${style.id === openId ? 'open' : ''}>
+            <summary>${escapeHtml(style.name || 'Без названия')}</summary>
+            <div class="reel-style-body">
+                <div class="reel-style-top">
+                    <input type="text" class="text_pole" data-f="name" value="${escapeHtml(style.name)}" placeholder="Название">
+                    <button type="button" class="reel-icon" data-act="remove" title="Удалить"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <textarea class="text_pole reel-jb-text" data-f="tags" rows="4" spellcheck="false" placeholder="текст стиля — уходит в начало промпта для бананы">${escapeHtml(style.tags)}</textarea>
+            </div>
+        </details>`).join('');
+
+    for (const item of list.querySelectorAll('.reel-style-item')) {
+        const style = () => getSettings().styles.find(s => s.id === item.dataset.id);
+        item.querySelector('[data-f="name"]').addEventListener('change', (e) => {
+            const target = style();
+            if (!target) return;
+            target.name = String(e.target.value || '').trim() || 'Без названия';
+            item.querySelector('summary').textContent = target.name;
+            saveSettings();
+            renderWindow();
+        });
+        item.querySelector('[data-f="tags"]').addEventListener('change', (e) => {
+            const target = style();
+            if (!target) return;
+            target.tags = String(e.target.value || '').trim();
+            saveSettings();
+        });
+        item.querySelector('[data-act="remove"]').addEventListener('click', () => {
+            const settings = getSettings();
+            settings.styles = settings.styles.filter(s => s.id !== item.dataset.id);
+            if (settings.activeStyleId === item.dataset.id) settings.activeStyleId = '';
+            saveSettings();
+            renderStylesList();
+            renderWindow();
+        });
+    }
+}
+
+/** Импорт из файла экспорта Фреймвивера: список с галками. */
+async function importStylesFromFile(file) {
+    let incoming;
+    try {
+        const parsed = JSON.parse(await file.text());
+        const raw = Array.isArray(parsed) ? parsed : parsed?.styles;
+        incoming = (Array.isArray(raw) ? raw : [])
+            .map(s => ({ name: String(s?.name || '').trim(), tags: String(s?.value ?? s?.tags ?? '').trim() }))
+            .filter(s => s.tags);
+        if (!incoming.length) throw new Error('в файле нет стилей');
+    } catch (error) {
+        toastr.error(`Не удалось прочитать файл: ${error?.message}`, TOAST_TITLE, { timeOut: 5000 });
+        return;
+    }
+
+    document.getElementById('reel_import_overlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'reel_import_overlay';
+    overlay.className = 'reel-popup-ov';
+    overlay.innerHTML = `
+        <div class="reel-popup reel-import" role="dialog" aria-label="Импорт стилей">
+            <div class="reel-popup-head">
+                <div class="reel-popup-title">「 Импорт стилей 」</div>
+                <button class="reel-popup-x" type="button" aria-label="Закрыть"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="reel-import-list">
+                ${incoming.map((s, i) => `
+                    <label class="checkbox_label reel-import-item">
+                        <input type="checkbox" data-i="${i}" ${/novel|\bnai\b/i.test(s.name) ? '' : 'checked'}>
+                        <span>${escapeHtml(s.name || 'Без названия')}</span>
+                    </label>`).join('')}
+            </div>
+            <div class="reel-popup-btns">
+                <button class="reel-pbtn primary" data-act="import">Импортировать</button>
+                <button class="reel-pbtn ghost" data-act="close">Отмена</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const close = () => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey, true);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+    document.addEventListener('keydown', onKey, true);
+    overlay.querySelector('.reel-popup-x').addEventListener('click', close);
+    overlay.querySelector('[data-act="close"]').addEventListener('click', close);
+    overlay.addEventListener('pointerdown', (e) => { if (e.target === overlay) close(); });
+
+    overlay.querySelector('[data-act="import"]').addEventListener('click', () => {
+        const picked = [...overlay.querySelectorAll('input[data-i]:checked')].map(el => incoming[Number(el.dataset.i)]);
+        // Импорт всегда добавляет, ничего не заменяет.
+        const settings = getSettings();
+        for (const s of picked) settings.styles.push({ id: newStyleId(), name: s.name || 'Без названия', tags: s.tags });
+        saveSettings();
+        close();
+        renderStylesList();
+        renderWindow();
+        toastr.success(`Импортировано стилей: ${picked.length}`, TOAST_TITLE, { timeOut: 2500 });
+    });
 }
 
 /** Выпадашку профилей рисует и обновляет сама таверна (как в борде). */

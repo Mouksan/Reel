@@ -34,6 +34,88 @@
 
 .reel-settings input[type="checkbox"]:disabled + span { opacity: 0.45; }
 
+/* Категории — по образцу DS Comments: заголовок-кнопка, тело сворачивается. */
+.reel-cat {
+    border-top: 1px solid var(--reel-border);
+}
+
+.reel-settings > label + .reel-cat { margin-top: 10px; }
+
+.reel-cat-head {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 6px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--reel-accent);
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.reel-cat-head[aria-expanded="true"] { background: rgba(255, 255, 255, 0.03); }
+
+.reel-cat-head:focus-visible {
+    outline: 2px solid var(--reel-accent);
+    outline-offset: -2px;
+}
+
+.reel-cat-chevron { transition: transform var(--reel-transition); }
+.reel-cat-head[aria-expanded="true"] .reel-cat-chevron { transform: rotate(180deg); }
+
+.reel-cat-body { padding: 0 4px 12px; }
+.reel-cat-body[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .reel-cat-chevron { transition: none; }
+}
+
+/* Переключатель-сегменты (источник модели), как в DS Comments. */
+.reel-seg {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--reel-radius);
+}
+
+.reel-seg-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 1;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--reel-text);
+    opacity: 0.7;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.12s, opacity 0.12s;
+}
+
+.reel-seg-btn.active { background: var(--reel-accent); color: #fff; opacity: 1; }
+
+.reel-seg-btn:focus-visible {
+    outline: 2px solid var(--reel-accent);
+    outline-offset: 2px;
+    opacity: 1;
+}
+
+
 /* ==================== Окно ==================== */
 
 .reel-window {
@@ -694,3 +776,65 @@ textarea.reel-expand-text {
 
 .reel-launcher i,
 .reel-fab i { pointer-events: none; }
+
+/* Стили (порт из Глинта) */
+
+.reel-styles-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.reel-style-item {
+    border: 1px solid var(--reel-border);
+    border-radius: var(--reel-radius);
+    padding: 4px 8px;
+}
+
+.reel-style-item summary {
+    cursor: pointer;
+    font-size: 0.85em;
+    padding: 3px 0;
+}
+
+.reel-style-body { padding: 6px 0 4px; }
+
+.reel-style-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.reel-style-top input { flex: 1; min-width: 0; margin: 0; }
+
+.reel-style-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+/* Импорт стилей */
+
+.reel-import { width: min(480px, 100%); }
+
+.reel-import-list {
+    padding: 0 14px;
+    overflow-y: auto;
+    max-height: 60dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reel-import-item {
+    padding: 5px 6px;
+    border-radius: 6px;
+    font-size: 0.85em;
+}
+
+.reel-import-item:hover { background: rgba(255, 255, 255, 0.05); }
