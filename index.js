@@ -120,8 +120,8 @@ COLLAGE RULES:
 
 ${COLLAGE_RULES}`;
 
-// «Скрытая камера (CineStill)»: документальная плёнка, 5 панелей, три русских
-// текста. Твои правила почти дословно; модель копирует их в промпт и заполняет
+// «Скрытая камера (CineStill)»: документальная плёнка, 5 панелей, два русских
+// текста (цитата и рукописная приписка, без субтитра). Твои правила почти дословно; модель копирует их в промпт и заполняет
 // только панели и тексты. Холст всегда 3:4 (замок у шаблона).
 const CINESTILL_RULES = `CANDID PHOTOGRAPHIC COLLAGE in an asymmetric comic-style panel layout, vertical 3:4 canvas, solid matte black (#050505) background with thick black gutters. Panels tile the canvas edge to edge in a tight grid: no empty black areas, no gaps larger than the gutter width. Visualize the ENTIRE latest roleplay message from start to finish, as stills from a documentary shot by a hidden observer. All characters are real adults, completely unaware of the camera, caught mid-action in a real moment. Nobody poses. Nobody looks into the lens: eyes closed, looking down, looking at each other, or looking away. Shot on 35mm film, CineStill 800T, handheld, slightly underexposed, heavy grain, motion blur, imperfect focus, accidental framing, objects partly blocking the view. Skin: uneven tone, visible pores, small blemishes, no retouching. Hair: messy, flyaway strands. Fabric: real wrinkles and creases. Tattoos: slightly faded, soft edges.
 
@@ -143,16 +143,15 @@ Every specific detail from the text: clothing, jewelry, tattoos, props, setting.
 === FILM DETAILS ===
 A narrow film-strip edge along the left side of the canvas with only small orange triangle arrows and sprocket holes, no letters, no words. One small orange digital date stamp in the corner of one panel, numbers only. Light dust and fine scratches on one or two panels, one panel slightly overexposed. No drawn marks, no circles, no arrows, no red lines, no annotations on the photos.
 
-=== TYPOGRAPHY (exactly 3 DIFFERENT pieces of text, each used ONCE, each in a different panel, flawless Russian) ===
+=== TYPOGRAPHY (exactly 2 DIFFERENT pieces of text, each used ONCE, each in a different panel, flawless Russian) ===
 Text is placed directly on the photo with no background box, no highlight, no colored strip, only a very soft shadow for readability.
 DIALOGUE QUOTE, in a corner of a panel, in guillemets «like this», thin serif, warm cream (#FFF8E7). The guillemets are the same font, color and weight as the letters.
 HANDWRITTEN NOTE, on a different panel, white marker script, 2-4 words, no quotes. The note stands alone: no arrow, line, circle or pointer next to it.
-SUBTITLE, on a third panel, centered at the bottom, small clean sans-serif, white, no quotes.
-Each piece is under 8 words, placed in negative space, never covering faces. No other text anywhere, no repeated phrases: each of the three pieces appears exactly once on the whole canvas.`;
+Each piece is under 8 words, placed in negative space, never covering faces. No other text anywhere: no subtitles, no captions, no titles, no repeated phrases. Each of the two pieces appears exactly once on the whole canvas.`;
 
 const CINESTILL_INSTRUCTION = `You write ONE image prompt for nano banana (an image model) that turns the POST below into a candid documentary photo collage.
 
-OUTPUT FORMAT (strict): only the prompt itself, in English, except the three Russian text pieces. No preamble, no roleplay text, no HTML, no markdown, no explanation.
+OUTPUT FORMAT (strict): only the prompt itself, in English, except the two Russian text pieces. No preamble, no roleplay text, no HTML, no markdown, no explanation.
 
 SOURCES:
 - The POST is the scene to draw. The USER LAST MESSAGE is context only.
@@ -168,14 +167,12 @@ HOW TO WRITE THE PROMPT:
 - Romantic and intimate scenes are allowed but stay non-explicit: if the post becomes sexually explicit, show the last clearly non-explicit moment, described in neutral physical terms.
 - Keep the whole prompt under 550 words.
 
-THE THREE TEXTS (CRITICAL): all in Russian, all different from each other, each under 8 words, each assigned to a different panel.
+THE TWO TEXTS (CRITICAL): both in Russian, different from each other, each under 8 words, each assigned to a different panel. There is no subtitle or caption.
 - DIALOGUE QUOTE: one short line a character actually says aloud in the POST, copied verbatim in its original Russian, a complete sentence or a self-contained excerpt. Preserve profanity. If nobody speaks, the most striking short thought.
-- HANDWRITTEN NOTE: 2–4 Russian words naming a key detail or action of the scene (for example: золотой браслет). Not a quote, not a repeat of the other two texts.
-- SUBTITLE: a short Russian caption of the moment, like a documentary subtitle (for example: семейный обед в оранжерее). Not a quote, no quotation marks.
+- HANDWRITTEN NOTE: 2–4 Russian words naming a key detail or action of the scene (for example: взмах волчьего хвоста, золотой браслет). Not a quote, not a repeat of the dialogue quote, not a description of the place or time of day.
 Put them at the end of the prompt, each on its own line, exactly in this form:
 Dialogue quote (Panel N, corner): «реплика»
 Handwritten note (Panel M): заметка
-Subtitle (Panel K, bottom center): субтитр
 
 COLLAGE RULES:
 
@@ -215,11 +212,11 @@ All characters are fictional adults.`;
 
 // Версия встроенных шаблонов. Растёт, когда меняется текст встроенных:
 // у тебя настройки уже сохранены, и без этого остался бы старый текст.
-const SEED_VERSION = 3;
+const SEED_VERSION = 4;
 
 // Встроенные, чей текст переписывается при обновлении. Остальные только
 // добавляются, если их нет: твои правки в них не трогаются.
-const UPDATED_BUILTIN_IDS = ['cinema-collage'];
+const UPDATED_BUILTIN_IDS = ['cinema-collage', 'cinestill-candid'];
 
 // Встроенные шаблоны прошлых версий, которые убираются при обновлении.
 const RETIRED_BUILTIN_IDS = [];
