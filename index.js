@@ -2373,7 +2373,7 @@ function renderTagsPanel() {
     panel.innerHTML = `
         <div class="reel-tags-title">Персонажи этого чата</div>
         ${isGroupChat() ? '<div class="reel-hint">В групповом чате добавь участников через ＋.</div>' : ''}
-        <button type="button" class="reel-btn reel-btn-import" data-act="import-fw">Взять рефы из Frameweaver</button>
+        <button type="button" class="reel-btn reel-btn-import" data-act="import-fw">Взять рефы из Frame</button>
         <div class="reel-hint">Реф уходит, если имя персонажа есть в промпте или стоит «Всегда отправлять». Не больше ${MAX_REFS}. Несколько имён — через запятую.</div>
         ${rows.join('')}
         <button type="button" class="reel-btn" data-act="add">＋ Добавить персонажа</button>`;
@@ -2512,11 +2512,11 @@ async function importRefsFromFrameweaver(button) {
     if (!chatState) return;
     const found = getFrameweaverRefContainer();
     if (!found) {
-        toastr.warning('Frameweaver не найден', TOAST_TITLE, { timeOut: 3000 });
+        toastr.warning('Frame не найден', TOAST_TITLE, { timeOut: 3000 });
         return;
     }
     if (!found.container) {
-        toastr.warning('У Frameweaver нет рефов для этого чата', TOAST_TITLE, { timeOut: 3000 });
+        toastr.warning('У Frame нет рефов для этого чата', TOAST_TITLE, { timeOut: 3000 });
         return;
     }
     const { container, fw } = found;
@@ -2543,7 +2543,7 @@ async function importRefsFromFrameweaver(button) {
         else plan.push({ ref: npc, extraName: name, always: false });
     }
     if (!plan.length) {
-        toastr.warning('У Frameweaver нет рефов для этого чата', TOAST_TITLE, { timeOut: 3000 });
+        toastr.warning('У Frame нет рефов для этого чата', TOAST_TITLE, { timeOut: 3000 });
         return;
     }
 
@@ -2554,14 +2554,14 @@ async function importRefsFromFrameweaver(button) {
     });
     if (conflicts.length) {
         const answer = await context.callGenericPopup(
-            `У ${conflicts.map(c => c.name || c.extraName).join(', ')} уже есть реф. Заменить рефами из Frameweaver?`,
+            `У ${conflicts.map(c => c.name || c.extraName).join(', ')} уже есть реф. Заменить рефами из Frame?`,
             context.POPUP_TYPE.CONFIRM);
         if (answer !== context.POPUP_RESULT.AFFIRMATIVE) return;
     }
 
     const chatId = getCurrentChatId();
     button.disabled = true;
-    toastr.info('Забираю рефы из Frameweaver…', TOAST_TITLE, { timeOut: 2000 });
+    toastr.info('Забираю рефы из Frame…', TOAST_TITLE, { timeOut: 2000 });
     let taken = 0;
     let failed = 0;
     try {
@@ -2571,7 +2571,7 @@ async function importRefsFromFrameweaver(button) {
                 path = await saveRefImage(await fwRefToDataUrl(item.ref));
             } catch (error) {
                 failed++;
-                reelLog('WARN', `Реф «${item.name || item.extraName}» из Frameweaver не взялся:`, error);
+                reelLog('WARN', `Реф «${item.name || item.extraName}» из Frame не взялся:`, error);
                 continue;
             }
             if (getCurrentChatId() !== chatId) return;
@@ -3334,7 +3334,7 @@ function buildSettingsPanel() {
                             <i class="fa-solid fa-plus"></i><span>Новый стиль</span>
                         </div>
                         <div class="menu_button menu_button_icon" id="reel_style_import">
-                            <i class="fa-solid fa-file-import"></i><span>Импорт из Frameweaver</span>
+                            <i class="fa-solid fa-file-import"></i><span>Импорт из Frame</span>
                         </div>
                     </div>
                     <input type="file" id="reel_style_import_file" accept="application/json,.json" hidden>
