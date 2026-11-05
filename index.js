@@ -465,11 +465,27 @@ async function setAuto(value) {
 // пустой.
 
 /** send_date свайпа — его отпечаток. */
-function getSwipeKey(message, swipeIdx) {
-    if (!message) return null;
+/** Время создания свайпа — как его хранит таверна. */
+function rawSwipeDate(message, swipeIdx) {
     const currentIdx = typeof message.swipe_id === 'number' ? message.swipe_id : 0;
     if (swipeIdx === currentIdx) return message.send_date ?? null;
     return message.swipe_info?.[swipeIdx]?.send_date ?? null;
+}
+
+/**
+ * Отпечаток свайпа. Обычно это его время создания. Но у приветствия с
+ * альтернативами таверна ставит всем свайпам одно и то же время — тогда к
+ * нему дописывается номер свайпа, иначе все приветствия сливаются в одно.
+ */
+function getSwipeKey(message, swipeIdx) {
+    if (!message) return null;
+    const date = rawSwipeDate(message, swipeIdx);
+    if (date === null || date === undefined) return null;
+    const count = Array.isArray(message.swipes) ? message.swipes.length : 1;
+    for (let i = 0; i < count; i++) {
+        if (i !== swipeIdx && rawSwipeDate(message, i) === date) return `${date}#${swipeIdx}`;
+    }
+    return date;
 }
 
 function getCurrentSwipeIdx(message) {
@@ -487,8 +503,13 @@ function readSwipeData(message, swipeIdx = getCurrentSwipeIdx(message)) {
     const data = extra?.[SWIPE_DATA_KEY];
     if (!data || typeof data !== 'object') return null;
     const key = getSwipeKey(message, swipeIdx);
-    if (!key || data.key !== key) return null;
-    return data;
+    if (!key) return null;
+    if (data.key === key) return data;
+    // Старые данные на свайпах с одинаковым временем (приветствия) писались
+    // по голому времени — лежат в своём же свайпе, так что берём их.
+    const raw = rawSwipeDate(message, swipeIdx);
+    if (key !== raw && data.key === raw) return data;
+    return null;
 }
 
 /**
