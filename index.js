@@ -428,6 +428,11 @@ function getChatState() {
     if (!Array.isArray(chatState.characters.extra)) chatState.characters.extra = [];
     // Рефы: { char|user|<id доп. персонажа>: { path, always } }.
     if (!chatState.refs || typeof chatState.refs !== 'object') chatState.refs = {};
+    // Свои имена {{char}} и {{user}} для поиска в промпте — в дополнение к имени из карточки.
+    if (!chatState.names || typeof chatState.names !== 'object') chatState.names = {};
+    for (const slot of ['char', 'user']) {
+        if (typeof chatState.names[slot] !== 'string') chatState.names[slot] = '';
+    }
     return chatState;
 }
 
@@ -1552,8 +1557,9 @@ function getRefEntries() {
         const ref = chatState.refs[key];
         if (ref?.path) out.push({ key, name: String(name || '').trim(), path: ref.path, always: !!ref.always });
     };
-    if (!isGroupChat()) push('char', context.name2);
-    push('user', context.name1);
+    const withAliases = (cardName, aliases) => [cardName, aliases].map(x => String(x || '').trim()).filter(Boolean).join(', ');
+    if (!isGroupChat()) push('char', withAliases(context.name2, chatState.names.char));
+    push('user', withAliases(context.name1, chatState.names.user));
     for (const extra of chatState.characters.extra) push(extra.id, extra.name);
     return out;
 }
@@ -2380,6 +2386,9 @@ function renderTagsPanel() {
                 <button type="button" class="reel-btn reel-btn-small" data-act="suggest">✨ Предложить по карточке</button>
                 ${editableName ? '<button type="button" class="reel-icon" data-act="remove" title="Удалить"><i class="fa-solid fa-trash"></i></button>' : ''}
             </div>
+            ${slot === 'char' || slot === 'user'
+                ? `<input type="text" class="text_pole reel-char-aliases" data-f="aliases" value="${escapeHtml(chatState.names[slot])}" placeholder="Имена в промпте через запятую: Rodion, Rodya" title="Реф уйдёт, если в промпте есть имя из карточки или любое из этих">`
+                : ''}
             <textarea class="text_pole reel-char-tags" data-f="tags" rows="3" placeholder="${escapeHtml(TAGS_PLACEHOLDER)}">${escapeHtml(tags)}</textarea>
             ${refBlock(slot === 'extra' ? id : slot)}
         </div>`;
@@ -2395,7 +2404,7 @@ function renderTagsPanel() {
         <div class="reel-tags-title">Персонажи этого чата</div>
         ${isGroupChat() ? '<div class="reel-hint">В групповом чате добавь участников через ＋.</div>' : ''}
         <button type="button" class="reel-btn reel-btn-import" data-act="import-fw">Взять рефы из Frame</button>
-        <div class="reel-hint">Реф уходит, если имя персонажа есть в промпте или стоит «Всегда отправлять». Не больше ${MAX_REFS}. Несколько имён — через запятую.</div>
+        <div class="reel-hint">Реф уходит, если имя персонажа есть в промпте или стоит «Всегда отправлять». Не больше ${MAX_REFS}. Несколько имён — через запятую; у персонажа и юзера — в поле под именем.</div>
         ${rows.join('')}
         <button type="button" class="reel-btn" data-act="add">＋ Добавить персонажа</button>`;
 
@@ -2527,6 +2536,20 @@ function firstAlias(name) {
     return String(name || '').split(',')[0].trim().toLowerCase();
 }
 
+/** Имена рефа из Frame → в поле своих имён {{char}}/{{user}}: без дублей и без имени из карточки. */
+function mergeFwNames(chatState, slot, fwNames) {
+    const context = getContext();
+    const cardName = String((slot === 'char' ? context.name2 : context.name1) || '').trim().toLowerCase();
+    const list = String(chatState.names[slot] || '').split(',').map(a => a.trim()).filter(Boolean);
+    const seen = new Set([cardName, ...list.map(a => a.toLowerCase())]);
+    for (const alias of String(fwNames || '').split(',').map(a => a.trim()).filter(Boolean)) {
+        if (seen.has(alias.toLowerCase())) continue;
+        seen.add(alias.toLowerCase());
+        list.push(alias);
+    }
+    chatState.names[slot] = list.join(', ');
+}
+
 async function importRefsFromFrameweaver(button) {
     const context = getContext();
     const chatState = getChatState();
@@ -2607,6 +2630,7 @@ async function importRefsFromFrameweaver(button) {
                 key = extra.id;
             }
             live.refs[key] = { path, always: item.always };
+            if (item.key) mergeFwNames(live, item.key, item.name);
             taken++;
         }
         await saveChatState();
@@ -2633,6 +2657,7 @@ async function saveTagRow(rowEl) {
     const slot = rowEl.dataset.slot;
     if (slot === 'char' || slot === 'user') {
         chatState.characters[slot] = tags;
+        chatState.names[slot] = String(rowEl.querySelector('[data-f="aliases"]')?.value || '').trim();
     } else {
         const extra = chatState.characters.extra.find(x => x.id === rowEl.dataset.id);
         if (!extra) return;

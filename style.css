@@ -301,6 +301,12 @@ input.reel-char-name-input {
     margin: 0;
 }
 
+input.reel-char-aliases {
+    width: 100%;
+    margin: 0 0 6px;
+    font-size: 0.8em;
+}
+
 textarea.reel-char-tags {
     width: 100%;
     min-height: 54px;
