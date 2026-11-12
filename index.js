@@ -776,6 +776,29 @@ function pickLayout() {
 
 const LAYOUT_MACRO_RE = /\{\{layout\}\}/gi;
 
+// Модель любит писать «Viktor Petrov», а потом просто «Petrov» — и реф по
+// имени промахивается. Поэтому к инструкции любого шаблона дописываем
+// правило: только имена, ровно в том написании, которое ищут рефы.
+const NAMES_RULE = 'CHARACTER NAMES: call every character by first name only. Never use surnames, family names, patronymics, titles or nicknames, not even once. This overrides any instruction to use full names.';
+
+/** Блок правила об именах: первое имя из поля «Имена в промпте», иначе имя из карточки. */
+function buildNamesRule() {
+    const chatState = getChatState();
+    const context = getContext();
+    const names = [];
+    const add = (field) => {
+        const first = String(field || '').split(',').map(a => a.trim()).find(Boolean);
+        if (first && !names.some(n => n.toLowerCase() === first.toLowerCase())) names.push(first);
+    };
+    if (chatState) {
+        if (!isGroupChat()) add(chatState.names.char || context.name2);
+        add(chatState.names.user || context.name1);
+        for (const extra of chatState.characters.extra) add(extra.name);
+    }
+    if (!names.length) return NAMES_RULE;
+    return `${NAMES_RULE.replace('first name only.', 'first name only, spelled exactly as listed.')}\n${names.map(n => `- ${n}`).join('\n')}`;
+}
+
 /** {{layout}} подставляем до макросов таверны: незнакомые макросы новая таверна может вырезать. */
 function buildInstruction(template, layout) {
     const layoutText = layout ? layout.text : FREE_LAYOUT_TEXT;
@@ -1040,7 +1063,7 @@ async function runPrompt(messageId, { wish = '' } = {}) {
     let raw = '';
     let failure = null;
     try {
-        const instruction = buildInstruction(template, layout);
+        const instruction = `${buildInstruction(template, layout)}\n\n${buildNamesRule()}`;
         const contextText = buildPromptContext(messageId, wish);
         reelLog('INFO', `#${messageId}: запрос, шаблон «${preset?.name}», раскладка «${layout?.name || 'на выбор'}»`, { instruction, contextText });
         raw = await requestModel(instruction, contextText, job.controller.signal);
