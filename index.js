@@ -573,6 +573,13 @@ async function writeSwipeData(target, patch) {
         info.extra[SWIPE_DATA_KEY] = structuredClone(data);
     }
 
+    // Пока в чате одно приветствие, таверна пересоздаёт его при смене персоны
+    // (в том числе привязанной — на загрузке) или правке карточки, и наши
+    // данные улетают вместе со старым. Флаг «чат тронут» — тот же, что таверна
+    // ставит после первого сообщения — это выключает.
+    if (found.messageId === 0 && context.chatMetadata && !context.chatMetadata.tainted) {
+        context.chatMetadata.tainted = true;
+    }
     await context.saveChat();
     reelLog('INFO', `Записано в #${found.messageId}[${found.swipeIdx}]:`, data);
     renderWindow();
