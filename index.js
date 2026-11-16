@@ -2433,7 +2433,10 @@ function renderTagsPanel() {
     panel.innerHTML = `
         <div class="reel-tags-title">Персонажи этого чата</div>
         ${isGroupChat() ? '<div class="reel-hint">В групповом чате добавь участников через ＋.</div>' : ''}
-        <button type="button" class="reel-btn reel-btn-import" data-act="import-fw">Взять рефы из Frame</button>
+        <div class="reel-import-row">
+            <button type="button" class="reel-btn reel-btn-import" data-act="import-fw">Взять рефы из Frame</button>
+            <button type="button" class="reel-btn reel-btn-import" data-act="import-sib">Взять рефы из Glint</button>
+        </div>
         <div class="reel-hint">Реф уходит, если имя персонажа есть в промпте или стоит «Всегда отправлять». Не больше ${MAX_REFS}. Несколько имён — через запятую; у персонажа и юзера — в поле под именем.</div>
         ${rows.join('')}
         <button type="button" class="reel-btn" data-act="add">＋ Добавить персонажа</button>`;
@@ -2461,6 +2464,7 @@ function renderTagsPanel() {
     }
 
     panel.querySelector('[data-act="import-fw"]').addEventListener('click', (e) => importRefsFromFrameweaver(e.currentTarget));
+    panel.querySelector('[data-act="import-sib"]').addEventListener('click', (e) => importRefsFromSibling(e.currentTarget));
 }
 
 /** Ключ рефа для строки панели. */
@@ -2621,55 +2625,137 @@ async function importRefsFromFrameweaver(button) {
         return;
     }
 
-    // Не трогаем уже загруженное без спроса.
-    const conflicts = plan.filter(item => {
-        const key = item.key || findExtra(item.extraName)?.id;
+    for (const item of plan) item.load = () => fwRefToDataUrl(item.ref);
+    await applyRefImport(plan, 'Frame', button);
+}
+
+/**
+ * Раскладывает импортированные рефы по слотам этого чата.
+ * plan: [{ key?: 'char'|'user', extraName?, name, always, tags?, load: async () => dataUrl }]
+ * Совпавшие слоты — по вопросу: «Да» заменяет, «Нет» оставляет, крестик/Esc отменяет всё.
+ * Новые добавляются в любом случае.
+ */
+async function applyRefImport(plan, sourceLabel, button) {
+    const context = getContext();
+    const chatState = getChatState();
+    if (!chatState) return;
+    const findExtra = (state, name) => state.characters.extra.find(x => firstAlias(x.name) && firstAlias(x.name) === firstAlias(name));
+    // В окне и логах — имя из карточки для {{char}}/{{user}}, первое имя для остальных.
+    const label = (item) => {
+        if (item.key === 'char') return context.name2 || item.name;
+        if (item.key === 'user') return context.name1 || item.name;
+        return String(item.extraName || item.name || '').split(',')[0].trim();
+    };
+
+    const conflicts = new Set(plan.filter(item => {
+        const key = item.key || findExtra(chatState, item.extraName)?.id;
         return key && chatState.refs[key]?.path;
-    });
-    if (conflicts.length) {
+    }));
+    let replace = false;
+    if (conflicts.size) {
+        const fresh = plan.filter(item => !conflicts.has(item));
+        const tail = fresh.length ? ` Новые (${fresh.map(label).join(', ')}) добавлю в любом случае.` : '';
         const answer = await context.callGenericPopup(
-            `У ${conflicts.map(c => c.name || c.extraName).join(', ')} уже есть реф. Заменить рефами из Frame?`,
+            `У ${[...conflicts].map(label).join(', ')} уже есть реф. Заменить рефами из ${sourceLabel}?${tail}`,
             context.POPUP_TYPE.CONFIRM);
-        if (answer !== context.POPUP_RESULT.AFFIRMATIVE) return;
+        if (answer === context.POPUP_RESULT.AFFIRMATIVE) replace = true;
+        else if (answer !== context.POPUP_RESULT.NEGATIVE) return;
+    }
+    const todo = replace ? plan : plan.filter(item => !conflicts.has(item));
+    const kept = replace ? 0 : conflicts.size;
+    if (!todo.length) {
+        toastr.info(`Новых рефов в ${sourceLabel} нет — оставил как было: ${kept}`, TOAST_TITLE, { timeOut: 3000 });
+        return;
     }
 
     const chatId = getCurrentChatId();
     button.disabled = true;
-    toastr.info('Забираю рефы из Frame…', TOAST_TITLE, { timeOut: 2000 });
+    toastr.info(`Забираю рефы из ${sourceLabel}…`, TOAST_TITLE, { timeOut: 2000 });
     let taken = 0;
+    let replaced = 0;
     let failed = 0;
     try {
-        for (const item of plan) {
+        for (const item of todo) {
             let path;
             try {
-                path = await saveRefImage(await fwRefToDataUrl(item.ref));
+                path = await saveRefImage(await item.load());
             } catch (error) {
                 failed++;
-                reelLog('WARN', `Реф «${item.name || item.extraName}» из Frame не взялся:`, error);
+                reelLog('WARN', `Реф «${label(item)}» из ${sourceLabel} не взялся:`, error);
                 continue;
             }
             if (getCurrentChatId() !== chatId) return;
             const live = getChatState();
             let key = item.key;
             if (!key) {
-                let extra = live.characters.extra.find(x => firstAlias(x.name) && firstAlias(x.name) === firstAlias(item.extraName));
+                let extra = findExtra(live, item.extraName);
                 if (!extra) {
-                    extra = { id: newExtraId(), name: item.extraName, tags: '' };
+                    // Новый персонаж: имя и внешность — от источника, если она там есть.
+                    extra = { id: newExtraId(), name: item.extraName, tags: String(item.tags || '').trim() };
                     live.characters.extra.push(extra);
+                } else if (!String(extra.tags || '').trim() && item.tags) {
+                    extra.tags = String(item.tags).trim();
                 }
                 key = extra.id;
+            } else if (!String(live.characters[key] || '').trim() && item.tags) {
+                live.characters[key] = String(item.tags).trim();
             }
-            live.refs[key] = { path, always: item.always };
+            if (conflicts.has(item)) replaced++;
+            else taken++;
+            live.refs[key] = { path, always: !!item.always };
             if (item.key) mergeFwNames(live, item.key, item.name);
-            taken++;
         }
         await saveChatState();
         renderTagsPanel();
-        const tail = failed ? `, не взялось: ${failed}` : '';
-        toastr.success(`Взял рефов: ${taken}${tail}`, TOAST_TITLE, { timeOut: 3000 });
+        const parts = [`Взял: ${taken}`];
+        if (replaced) parts.push(`заменил: ${replaced}`);
+        if (kept) parts.push(`оставил как было: ${kept}`);
+        if (failed) parts.push(`не взялось: ${failed}`);
+        toastr.success(parts.join(', '), TOAST_TITLE, { timeOut: 3000 });
     } finally {
         button.disabled = false;
     }
+}
+
+// ─── Импорт рефов от соседа (Reel ⇄ Glint) ───────────────────────────────
+// Сосед хранит рефы в метаданных этого же чата, в той же форме, что и мы.
+// Картинки копируются в нашу папку рефов — дальше они живут независимо.
+
+const SIBLING_META_KEY = 'glintweaver';
+const SIBLING_LABEL = 'Glint';
+
+async function importRefsFromSibling(button) {
+    const context = getContext();
+    if (!getChatState()) return;
+    const sib = context.chatMetadata?.[SIBLING_META_KEY];
+    const sibRefs = sib?.refs && typeof sib.refs === 'object' ? sib.refs : {};
+    const sibChars = sib?.characters && typeof sib.characters === 'object' ? sib.characters : {};
+    const sibNames = sib?.names && typeof sib.names === 'object' ? sib.names : {};
+    const plan = [];
+    const fromPath = (path) => () => loadRefDataUrl(path);
+
+    if (sibRefs.char?.path) {
+        const name = String(sibNames.char || '').trim();
+        if (!isGroupChat()) plan.push({ key: 'char', name: name || context.name2, always: !!sibRefs.char.always, tags: sibChars.char, load: fromPath(sibRefs.char.path) });
+        else if (name) plan.push({ extraName: name, name, always: !!sibRefs.char.always, tags: sibChars.char, load: fromPath(sibRefs.char.path) });
+    }
+    if (sibRefs.user?.path) {
+        plan.push({ key: 'user', name: String(sibNames.user || '').trim() || context.name1, always: !!sibRefs.user.always, tags: sibChars.user, load: fromPath(sibRefs.user.path) });
+    }
+    for (const extra of (Array.isArray(sibChars.extra) ? sibChars.extra : [])) {
+        const ref = sibRefs[extra?.id];
+        const name = String(extra?.name || '').trim();
+        if (!ref?.path || !name) continue;
+        const lower = firstAlias(name);
+        if (!isGroupChat() && lower === firstAlias(context.name2)) plan.push({ key: 'char', name, always: !!ref.always, tags: extra.tags, load: fromPath(ref.path) });
+        else if (lower === firstAlias(context.name1)) plan.push({ key: 'user', name, always: !!ref.always, tags: extra.tags, load: fromPath(ref.path) });
+        else plan.push({ extraName: name, name, always: !!ref.always, tags: extra.tags, load: fromPath(ref.path) });
+    }
+    if (!plan.length) {
+        toastr.warning(`У ${SIBLING_LABEL} нет рефов для этого чата`, TOAST_TITLE, { timeOut: 3000 });
+        return;
+    }
+    await applyRefImport(plan, SIBLING_LABEL, button);
 }
 
 /** Имя персонажа в строке панели. */

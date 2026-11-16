@@ -317,7 +317,8 @@ textarea.reel-char-tags {
 }
 
 #reel_view_tags > .reel-btn { width: 100%; margin-top: 10px; }
-#reel_view_tags > .reel-btn.reel-btn-import { margin: 0 0 4px; }
+#reel_view_tags > .reel-import-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+#reel_view_tags > .reel-import-row > .reel-btn { flex: 1 1 140px; margin: 0; }
 
 /* Рефы */
 .reel-ref {
