@@ -821,7 +821,47 @@ function buildInstruction(template, layout) {
  * Отмена работает только через профиль: generateRaw таверны сигнал не
  * принимает, там результат просто выбрасывается.
  */
+
+// Модель, которая пишет промпт, иногда сама «рисует»: прокси отдаёт картинку
+// markdown-ссылкой (![image](https://…/assets/….jpg)). Преамбула в начале
+// инструкции прямо говорит, что ответ — только текст.
+const TEXT_ONLY_PREAMBLE = 'TEXT-ONLY TASK. You are a prompt WRITER, not an image generator. '
+    + 'Reply with text only — the prompt written out in words, in the format required below. '
+    + 'Do NOT generate, draw, attach or link any image, even though the task describes one: '
+    + 'an image or an image link in your reply is a failure.';
+
+// Картинка в ответе: markdown-изображение, <img>, data:image или голая ссылка на файл картинки.
+const IMAGE_REPLY_PATTERNS = [
+    /!\[[^\]]*\]\(\s*(?:https?:|data:)[^)]*\)(?:_\d+)?/gi,
+    /<img\b[^>]*>/gi,
+    /data:image\/[a-z+.-]+;base64,[a-z0-9+/=]+/gi,
+    /https?:\/\/\S+?\.(?:png|jpe?g|webp|gif)(?:\?\S*)?(?:_\d+)?/gi,
+];
+
+/**
+ * Не пускает «картинку вместо промпта» дальше, в рисовалку: если кроме картинки
+ * в ответе почти ничего нет — ошибка; если модель написала промпт и приложила
+ * картинку — картинку вырезаем, промпт оставляем.
+ */
+function guardAgainstImageReply(text) {
+    const raw = String(text || '');
+    if (!IMAGE_REPLY_PATTERNS.some(re => { re.lastIndex = 0; return re.test(raw); })) return raw;
+    let cleaned = raw;
+    for (const re of IMAGE_REPLY_PATTERNS) cleaned = cleaned.replace(re, ' ');
+    cleaned = cleaned.replace(/[ \t]{2,}/g, ' ').trim();
+    reelLog('WARN', 'Модель вернула картинку вместо текста:', raw.slice(0, 300));
+    if (cleaned.replace(/^(?:ASPECT|PROMPT)\s*:.*$/gim, '').replace(/[\s\d_:]/g, '').length < 40) {
+        throw new Error('Модель нарисовала картинку вместо промпта — в рисовалку не отправил. Попробуй ещё раз');
+    }
+    return cleaned;
+}
+
 async function requestModel(instruction, contextText, signal) {
+    const text = await requestModelRaw(`${TEXT_ONLY_PREAMBLE}\n\n${instruction}`, contextText, signal);
+    return guardAgainstImageReply(text);
+}
+
+async function requestModelRaw(instruction, contextText, signal) {
     const context = getContext();
     const settings = getSettings();
     const maxTokens = settings.maxTokens || defaultSettings.maxTokens;
